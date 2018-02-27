@@ -41,14 +41,17 @@ class Benchmark {
 
     Mark8("task-create", d => {
         Task<int> t = new Task<int>(() => 23);
-        return 0;
+        return d;
       });
     Mark8("task-create-run", d => {
         Task<int> t = new Task<int>(() => 23);
         t.RunSynchronously();
         return t.Result;
       });
-    Mark8("task-run", d => Task.Run(() => 23).Id);
+    Mark8("task-run", d => {
+        Task.Run(() => 23);
+        return d;
+      });
 
     object o = new object();
     int i = 0;
