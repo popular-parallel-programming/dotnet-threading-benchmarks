@@ -30,6 +30,15 @@ class Benchmark {
         Lazy<int> l = new Lazy<int>(() => 23, LazyThreadSafetyMode.ExecutionAndPublication);
         return l.Value;
       });
+
+    try {
+      int workers = 0, completion = 0;
+      ThreadPool.GetMaxThreads(out workers, out completion);
+      ThreadPool.SetMinThreads(workers, completion);
+    } catch (Exception e) {
+      Console.WriteLine("# ERROR: Could not change TPL minimum thread count.");
+    }
+
     Mark8("task-create", d => {
         Task<int> t = new Task<int>(() => 23);
         return 0;
