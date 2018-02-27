@@ -8,6 +8,7 @@
 // sestoft@itu.dk * 2013-06-02, 2015-05-08
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,27 +32,22 @@ class Benchmark {
         return l.Value;
       });
 
-    try {
-      int workers = 0, completion = 0;
-      ThreadPool.GetMaxThreads(out workers, out completion);
-      ThreadPool.SetMinThreads(workers, completion);
-    } catch (Exception e) {
-      Console.WriteLine("# ERROR: Could not change TPL minimum thread count.");
-    }
-
     Mark8("task-create", d => {
         Task<int> t = new Task<int>(() => 23);
         return d;
       });
-    Mark8("task-create-run", d => {
-        Task<int> t = new Task<int>(() => 23);
-        t.RunSynchronously();
-        return t.Result;
-      });
-    Mark8("task-run", d => {
-        Task.Run(() => 23);
-        return d;
-      });
+
+    IntPtr affinity = Process.GetCurrentProcess().ProcessorAffinity;
+    int p = 2;
+    while (p <= Environment.ProcessorCount) {
+      Process.GetCurrentProcess().ProcessorAffinity = new IntPtr((1L << p) - 1);
+      Mark8(String.Format("task-run-{0}", p), d => {
+          Task.Run(() => 23);
+          return d;
+        });
+      p *= 2;
+    }
+    Process.GetCurrentProcess().ProcessorAffinity = affinity;
 
     object o = new object();
     int i = 0;
