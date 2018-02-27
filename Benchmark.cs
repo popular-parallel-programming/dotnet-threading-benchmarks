@@ -39,6 +39,8 @@ class Benchmark {
         t.RunSynchronously();
         return t.Result;
       });
+    Mark8("task-run", d => Task.Run(() => 23).Id);
+
     object o = new object();
     int i = 0;
     Mark8("lock", d => {
